@@ -20,7 +20,7 @@ def load_model(model_path_src):
     if os.path.exists(model_path_src):
         model = BertModel.from_pretrained(training_config['model_path_src'])
     else:
-        model = BertModel.from_pretrained("bert-base-chinese", num_labels = 2)
+        model = BertModel.from_pretrained("bert-base-uncased")
 
     return model
 
