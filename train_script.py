@@ -226,73 +226,7 @@ def train(training_config):
         print(f"Using {torch.cuda.device_count()} GPUs.")
         model = nn.DataParallel(model)
 
-    #  train_test_loop(training_config, model, dataloader_train, dataloader_test, optimizer, creterian, step_losses, train_losses, test_losses, train_accuracy, test_accuracy, device)
-    for epoch in range(training_config['num_of_epochs']):
-        loss_sum_train = 0
-        model.train()
-        #  train loop
-        for i, batch in enumerate(dataloader_train):
-            batch = tuple(t.to(device) for t in batch)
-            b_triple_tensor, b_triple_mask_tensor, b_lex_tensor, b_lex_mask_tensor, b_negative_lex_1, b_negative_lex_mask_1, b_negative_lex_2, b_negative_lex_mask_2 = batch
-
-            optimizer.zero_grad()
-
-
-            
-            b_triple_vector = model(b_triple_tensor, attention_mask = b_triple_mask_tensor)[1]
-            b_lex_vector = model(b_lex_tensor, attention_mask = b_lex_mask_tensor)[1]
-            b_neg_lex_vector_1 = model(b_negative_lex_1, attention_mask = b_negative_lex_mask_1)[1]
-            b_neg_lex_vector_2 = model(b_negative_lex_2, attention_mask = b_negative_lex_mask_2)[1]
-
-
-            loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector_1, b_neg_lex_vector_2)
-
-            loss.backward()
-            optimizer.step()
-            loss_scalar = loss.item()
-            loss_sum_train += loss_scalar
-            step_losses.append(loss_scalar)
-
-
-            #  b_predicts = torch.argmax(b_outputs, dim=-1)
-            #  correct += (b_predicts == b_labels).sum().item()
-
-        train_loss = loss_sum_train / len(dataloader_train)
-        train_losses.append(train_loss)
-
-
-
-
-
-
-        loss_sum_test = 0
-        correct = 0
-
-
-        model.eval() 
-        #  test_loop
-        for i, batch in enumerate(dataloader_test):
-            batch = tuple(t.to(device) for t in batch)
-            b_triple_tensor, b_triple_mask_tensor, b_lex_tensor, b_lex_mask_tensor, b_negative_lex_1, b_negative_lex_mask_1, b_negative_lex_2, b_negative_lex_mask_2 = batch
-
-            with torch.no_grad():
-                b_triple_vector = model(b_triple_tensor, attention_mask = b_triple_mask_tensor)[1]
-                b_lex_vector = model(b_lex_tensor, attention_mask = b_lex_mask_tensor)[1]
-                b_neg_lex_vector_1 = model(b_negative_lex_1, attention_mask = b_negative_lex_mask_1)[1]
-                b_neg_lex_vector_2 = model(b_negative_lex_2, attention_mask = b_negative_lex_mask_2)[1]
-
-
-                loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector_1, b_neg_lex_vector_2)
-
-                loss_scalar = loss.item()
-                loss_sum_test += loss_scalar
-
-        test_loss = loss_sum_test / len(dataloader_test)
-        test_losses.append(test_loss)
-
-
-
-        print(f'Epoch: {epoch+1} \n Train Loss: {train_loss:.6f}, train Test Loss: {test_loss:.6f}')
+    train_test_loop(training_config, model, dataloader_train, dataloader_test, optimizer, creterian, step_losses, train_losses, test_losses, train_accuracy, test_accuracy, device)
 
 
         
@@ -313,7 +247,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_of_epochs"    , type=int   , help="number of epochs"                                  , default=20)
     parser.add_argument("--batch_size"       , type=int   , help="batch size"                                        , default=256)
-    parser.add_argument("--learning_rate"    , type=float , help="learning rate"                                     , default=5e-4)
+    parser.add_argument("--learning_rate"    , type=float , help="learning rate"                                     , default=1e-4)
     parser.add_argument("--weight_decay"     , type=float , help="weight_decay"                                      , default=1e-4)
     parser.add_argument("--vocab_size"       , type=int   , help="vocab size"                                        , default=21128)
     parser.add_argument("--embedding_dim"    , type=int   , help="embedding dimmention"                              , default=512)
