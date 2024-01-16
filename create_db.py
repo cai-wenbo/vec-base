@@ -33,11 +33,12 @@ if __name__ == "__main__":
     max_length = 64
     
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
 
     ''' 
     import model
     '''
-    model = load_model(model_path_src)
+    model = load_model(model_path_src).to(device)
 
 
 
@@ -81,13 +82,13 @@ if __name__ == "__main__":
                 encoded_lex = encoding['input_ids']
                 lex_mask    = encoding['attention_mask']
 
-                lex_tensor         = torch.tensor(encoded_lex , dtype = torch.int32)
-                lex_mask_tensor    = torch.tensor(lex_mask      , dtype = torch.int32)
+                lex_tensor         = torch.tensor([encoded_lex] , dtype = torch.int32).to(device)
+                lex_mask_tensor    = torch.tensor([lex_mask]      , dtype = torch.int32).to(device)
 
                 with torch.no_grad():
-                    lex_vector = model(lex_tensor, attention_mask = lex_mask_tensor)[1]
-                    cursor.execute(f"INSERT INTO vecTable (vector, target) VALUES (?,?)", (json.dumps(lex_vector.to_list()), lex))
+                    lex_vector = model(lex_tensor, attention_mask = lex_mask_tensor)[1].squeeze(0).to('cpu')
+                    cursor.execute(f"INSERT INTO vecTable (vector, target) VALUES (?,?)", (json.dumps(lex_vector.tolist()), lex))
 
 
-        connection.commit()
-        connection.close()
+    connection.commit()
+    connection.close()
