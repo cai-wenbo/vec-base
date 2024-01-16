@@ -16,9 +16,9 @@ class EuciLoss(nn.Module):
         '''
 
         #  shape = batch_size
-        pos_distance = F.mse_loss(target_vec, pos_vec)
+        pos_distance = torch.cdist(target_vec.unsqueeze(dim = 1), pos_vec.unsqueeze(dim = 1)).squeeze(dim = 1)
         #  shape = batch_size, num_of_negative
-        neg_distance = F.mse_loss(target_vec, neg_vec)
+        neg_distance = torch.cdist(target_vec.unsqueeze(dim = 1), neg_vec.unsqueeze(dim = 1)).squeeze(dim = 1)
 
         #  print(weights)
         loss = F.logsigmoid(pos_distance) - F.logsigmoid(neg_distance)
