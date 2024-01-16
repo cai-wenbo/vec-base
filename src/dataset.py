@@ -72,7 +72,7 @@ class WebNLGDataset(Dataset):
 
     def __getitem__(self, idx):
         
-        random_idx = random.randint(0, len(self.tripleLexPair_list))
+        random_idx = random.randint(0, len(self.tripleLexPair_list) -1)
 
 
         negative_lex = self.tripleLexPair_list[random_idx].encoded_lex

@@ -71,17 +71,20 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
 
             optimizer.zero_grad()
 
+            
             b_triple_vector = model(b_triple_tensor, attention_mask = b_triple_mask_tensor)[1]
             b_lex_vector = model(b_lex_tensor, attention_mask = b_lex_mask_tensor)[1]
             b_neg_lex_vector = model(b_negative_lex, attention_mask = b_negative_lex_mask)[1]
 
-            loss = creterian(b_triple_mask_tensor, b_lex_vector, b_neg_lex_vector)
+
+            loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector)
 
             loss.backward()
             optimizer.step()
             loss_scalar = loss.item()
             loss_sum_train += loss_scalar
             step_losses.append(loss_scalar)
+
 
             #  b_predicts = torch.argmax(b_outputs, dim=-1)
             #  correct += (b_predicts == b_labels).sum().item()
@@ -92,8 +95,11 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
 
 
 
+
+
         loss_sum_test = 0
         correct = 0
+
 
         model.eval() 
         #  test_loop
@@ -106,7 +112,7 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
                 b_lex_vector = model(b_lex_tensor, attention_mask = b_lex_mask_tensor)[1]
                 b_neg_lex_vector = model(b_negative_lex, attention_mask = b_negative_lex_mask)[1]
 
-                loss = creterian(b_triple_mask_tensor, b_lex_vector, b_neg_lex_vector)
+                loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector)
 
                 loss_scalar = loss.item()
                 loss_sum_test += loss_scalar
@@ -161,8 +167,8 @@ def train(training_config):
     '''
     dataloader
     '''
-    train_dataset = WebNLGDataset(data_path = './data/en/train', max_length = 128)
-    test_dataset = WebNLGDataset(data_path = './data/en/dev', max_length = 128)
+    train_dataset = WebNLGDataset(data_path = './data/en/train', max_length = 128, selected_field = [0, 14])
+    test_dataset = WebNLGDataset(data_path = './data/en/dev', max_length = 128, selected_field = [0, 14])
 
     dataloader_train = DataLoader(train_dataset, batch_size = training_config['batch_size'], shuffle = True)
     dataloader_test  = DataLoader(test_dataset, batch_size  = training_config['batch_size'], shuffle = False)
@@ -225,7 +231,7 @@ def train(training_config):
     '''
 
     model = model.to('cpu').module
-    torch.save(model.state_dict(), training_config['model_path_dst'])
+    model.save_pretrained(training_config['model_path_dst'])
 
     #  save the loss of the steps
     save_trails(training_config, step_losses, train_losses, test_losses, train_accuracy, test_accuracy)
@@ -243,8 +249,8 @@ if __name__ == "__main__":
     parser.add_argument("--embedding_dim"    , type=int   , help="embedding dimmention"                              , default=512)
     parser.add_argument("--num_labels"       , type=int   , help="types of labels"                                   , default=6)
     parser.add_argument("--sequence_length"  , type=int   , help="sequence_length"                                   , default=128)
-    parser.add_argument("--model_path_dst"   , type=str   , help="the directory to save model"                       , default='./saved_models/saved_dict.pth')
-    parser.add_argument("--model_path_src"   , type=str   , help="the directory to load model"                       , default='./saved_models/saved_dict.pth')
+    parser.add_argument("--model_path_dst"   , type=str   , help="the directory to save model"                       , default='./saved_models/')
+    parser.add_argument("--model_path_src"   , type=str   , help="the directory to load model"                       , default='./saved_models/')
     parser.add_argument("--step_losses_pth"  , type=str   , help="the path of the json file that saves step losses"  , default='./trails/step_losses.json')
     parser.add_argument("--train_losses_pth" , type=str   , help="the path of the json file that saves train losses" , default='./trails/train_losses.json')
     parser.add_argument("--test_losses_pth"  , type=str   , help="the path of the json file that saves test losses"  , default='./trails/test_losses.json')
