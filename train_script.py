@@ -152,9 +152,6 @@ def train(training_config):
     '''
     model = load_model(training_config['model_path_src']).to(device)
 
-    if torch.cuda.device_count() > 1:
-        print(f"Using {torch.cuda.device_count()} GPUs.")
-        model = nn.DataParallel(model)
 
     #  load the losses history
     step_losses, train_losses, test_losses, train_accuracy, test_accuracy = load_trails(training_config)
@@ -215,6 +212,10 @@ def train(training_config):
     '''
     train  and validate loops
     '''
+    if torch.cuda.device_count() > 1:
+        print(f"Using {torch.cuda.device_count()} GPUs.")
+        model = nn.DataParallel(model)
+
     train_test_loop(training_config, model, dataloader_train, dataloader_test, optimizer, creterian, step_losses, train_losses, test_losses, train_accuracy, test_accuracy, device)
 
 
@@ -223,7 +224,7 @@ def train(training_config):
     save model and data
     '''
 
-    model = model.to('cpu')
+    model = model.to('cpu').module
     torch.save(model.state_dict(), training_config['model_path_dst'])
 
     #  save the loss of the steps
