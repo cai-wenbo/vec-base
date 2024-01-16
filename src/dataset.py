@@ -72,14 +72,11 @@ class WebNLGDataset(Dataset):
 
     def __getitem__(self, idx):
         
-        random_list = [random.randint(0, len(self.tripleLexPair_list)) for _ in range(self.num_of_negative)]
+        random_idx = random.randint(0, len(self.tripleLexPair_list))
 
-        negative_lex_list = list()
-        negative_lex_mask_list = list()
 
-        for i in range(self.num_of_negative):
-            negative_lex_list.append(self.tripleLexPair_list[random_list[i]].encoded_lex)
-            negative_lex_mask_list.append(self.tripleLexPair_list[random_list[i]].lex_mask)
+        negative_lex = self.tripleLexPair_list[random_idx].encoded_lex
+        negative_lex_mask = self.tripleLexPair_list[random_idx].lex_mask
 
 
 
@@ -89,8 +86,8 @@ class WebNLGDataset(Dataset):
         lex_tensor         = torch.tensor(self.tripleLexPair_list[idx].encoded_lex    , dtype = torch.int32)
         lex_mask_tensor    = torch.tensor(self.tripleLexPair_list[idx].lex_mask       , dtype = torch.int32)
 
-        negative_lex = torch.tensor(negative_lex_list, dtype = torch.int32)
-        negative_lex_mask = torch.tensor(negative_lex_mask_list, dtype = torch.int32)
+        negative_lex = torch.tensor(negative_lex, dtype = torch.int32)
+        negative_lex_mask = torch.tensor(negative_lex, dtype = torch.int32)
 
         
 

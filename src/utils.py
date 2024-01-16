@@ -21,7 +21,7 @@ class EuciLoss(nn.Module):
         neg_distance = F.mse_loss(target_vec, neg_vec)
 
         #  print(weights)
-        loss = F.logsigmoid(pos_distance) - torch.sum(F.logsigmoid(neg_distance), dim=-1)
+        loss = F.logsigmoid(pos_distance) - F.logsigmoid(neg_distance)
         
         if self.reduction == 'mean':
             loss = torch.mean(loss)
