@@ -74,10 +74,12 @@ class WebNLGDataset(Dataset):
         
         random_idx = random.randint(0, len(self.tripleLexPair_list) -1)
 
+        negative_lex_1 = self.tripleLexPair_list[random_idx].encoded_lex
+        negative_lex_mask_1 = self.tripleLexPair_list[random_idx].lex_mask
+        random_idx = random.randint(0, len(self.tripleLexPair_list) -1)
 
-        negative_lex = self.tripleLexPair_list[random_idx].encoded_lex
-        negative_lex_mask = self.tripleLexPair_list[random_idx].lex_mask
-
+        negative_lex_2 = self.tripleLexPair_list[random_idx].encoded_lex
+        negative_lex_mask_2 = self.tripleLexPair_list[random_idx].lex_mask
 
 
         #  tensorlize
@@ -86,9 +88,11 @@ class WebNLGDataset(Dataset):
         lex_tensor         = torch.tensor(self.tripleLexPair_list[idx].encoded_lex    , dtype = torch.int32)
         lex_mask_tensor    = torch.tensor(self.tripleLexPair_list[idx].lex_mask       , dtype = torch.int32)
 
-        negative_lex_tensor = torch.tensor(negative_lex, dtype = torch.int32)
-        negative_lex_mask_tensor = torch.tensor(negative_lex_mask, dtype = torch.int32)
+        negative_lex_tensor_1 = torch.tensor(negative_lex_1, dtype = torch.int32)
+        negative_lex_mask_tensor_1 = torch.tensor(negative_lex_mask_1, dtype = torch.int32)
+        negative_lex_tensor_2 = torch.tensor(negative_lex_2, dtype = torch.int32)
+        negative_lex_mask_tensor_2 = torch.tensor(negative_lex_mask_2, dtype = torch.int32)
 
         
 
-        return triple_tensor, triple_mask_tensor, lex_tensor, lex_mask_tensor, negative_lex_tensor, negative_lex_mask_tensor
+        return triple_tensor, triple_mask_tensor, lex_tensor, lex_mask_tensor, negative_lex_tensor_1, negative_lex_mask_tensor_1, negative_lex_tensor_2, negative_lex_mask_tensor_2
