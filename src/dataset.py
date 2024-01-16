@@ -86,9 +86,9 @@ class WebNLGDataset(Dataset):
         lex_tensor         = torch.tensor(self.tripleLexPair_list[idx].encoded_lex    , dtype = torch.int32)
         lex_mask_tensor    = torch.tensor(self.tripleLexPair_list[idx].lex_mask       , dtype = torch.int32)
 
-        negative_lex = torch.tensor(negative_lex, dtype = torch.int32)
-        negative_lex_mask = torch.tensor(negative_lex, dtype = torch.int32)
+        negative_lex_tensor = torch.tensor(negative_lex, dtype = torch.int32)
+        negative_lex_mask_tensor = torch.tensor(negative_lex_mask, dtype = torch.int32)
 
         
 
-        return triple_tensor, triple_mask_tensor, lex_tensor, lex_mask_tensor, negative_lex, negative_lex_mask
+        return triple_tensor, triple_mask_tensor, lex_tensor, lex_mask_tensor, negative_lex_tensor, negative_lex_mask_tensor

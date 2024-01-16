@@ -236,7 +236,7 @@ def train(training_config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_of_epochs"    , type=int   , help="number of epochs"                                  , default=20)
-    parser.add_argument("--batch_size"       , type=int   , help="batch size"                                        , default=512)
+    parser.add_argument("--batch_size"       , type=int   , help="batch size"                                        , default=64)
     parser.add_argument("--learning_rate"    , type=float , help="learning rate"                                     , default=5e-4)
     parser.add_argument("--weight_decay"     , type=float , help="weight_decay"                                      , default=1e-4)
     parser.add_argument("--vocab_size"       , type=int   , help="vocab size"                                        , default=21128)
