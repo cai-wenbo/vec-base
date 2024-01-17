@@ -12,25 +12,33 @@ class EuciLoss(nn.Module):
         '''
         target_vec shape = (batch_size, inner_dim)
         pos_vec shape = (batch_size, inner_dim)
-        neg_vec shape = (batch_size, num_of_negative, inner_dim)
+        neg_vec shape = (batch_size, inner_dim)
         '''
 
         #  shape = batch_size
-        pos_score = torch.cdist(target_vec.unsqueeze(dim = 1), pos_vec.unsqueeze(dim = 1)).squeeze(dim = 1).squeeze(dim = 1)
-        #  pos_score = torch.matmul(target_vec.unsqueeze(1), pos_vec.unsqueeze(-1)).squeeze(dim=1).squeeze(dim = 1)
-        #  pos_score = F.cosine_similarity(target_vec, pos_vec)
 
-        #  shape = batch_size, num_of_negative
-        neg_score_1 = -torch.cdist(target_vec.unsqueeze(dim = 1), neg_vec_1.unsqueeze(dim = 1)).squeeze(dim = 1).squeeze(dim = 1)
-        neg_score_2 = -torch.cdist(target_vec.unsqueeze(dim = 1), neg_vec_2.unsqueeze(dim = 1)).squeeze(dim = 1).squeeze(dim = 1)
+        #  pos_score = torch.square(torch.cdist(target_vec.unsqueeze(dim = 1), pos_vec.unsqueeze(dim = 1)).squeeze(dim = 1).squeeze(dim = 1))
+        #  neg_score_1 = torch.square(torch.cdist(target_vec.unsqueeze(dim = 1), neg_vec_1.unsqueeze(dim = 1)).squeeze(dim = 1).squeeze(dim = 1))
+        #  neg_score_2 = torch.square(torch.cdist(target_vec.unsqueeze(dim = 1), neg_vec_2.unsqueeze(dim = 1)).squeeze(dim = 1).squeeze(dim = 1))
+
+
+        #  pos_score = torch.matmul(target_vec.unsqueeze(1), pos_vec.unsqueeze(-1)).squeeze(dim=1).squeeze(dim = 1)
         #  neg_score_1 = torch.matmul(target_vec.unsqueeze(1), neg_vec_1.unsqueeze(-1)).squeeze(dim=1).squeeze(dim = 1)
         #  neg_score_2 = torch.matmul(target_vec.unsqueeze(1), neg_vec_2.unsqueeze(-1)).squeeze(dim=1).squeeze(dim = 1)
+
+
+        pos_score = F.cosine_similarity(target_vec, pos_vec)
+        neg_score_1 = F.cosine_similarity(target_vec, neg_vec_1)
+        neg_score_2 = F.cosine_similarity(target_vec, neg_vec_2)
+
+        #  shape = batch_size, num_of_negative
         #  neg_score = F.cosine_similarity(target_vec, neg_vec)
 
         #  print(weights)
-        loss =  (F.logsigmoid(pos_score) + F.logsigmoid(-neg_score_1) + F.logsigmoid(-neg_score_2))
+        loss =  -(F.logsigmoid(pos_score) + F.logsigmoid(-neg_score_1) + F.logsigmoid(-neg_score_2))
         #  loss  = pos_score - neg_score
         #  loss = pos_distance - neg_distance
+        #  loss =  pos_score - 1 / 2  * (neg_score_1 + neg_score_2)
 
         
         if self.reduction == 'mean':

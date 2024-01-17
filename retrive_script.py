@@ -41,12 +41,18 @@ class neighbourExtractor():
 
 
         with torch.no_grad():
-            input_vector = self.model(input_tensor, attention_mask = input_mask_tensor)[1].tolist()
+            input_vector = self.model(input_tensor, attention_mask = input_mask_tensor)[1].squeeze(0).tolist()
+
 
         scores = list()
         for i in range(len(self.vector_list)):
-            #  scores.append(np.sum(np.multiply(np.array(input_vector), np.array(self.vector_list[i]))))
-            scores.append(-np.linalg.norm(np.array(input_vector) - np.array(self.vector_list[i])))
+            input_array = np.array(input_vector)
+            record_array = np.array(self.vector_list[i])
+            #  scores.append(np.sum(np.multiply(input_array,record_array)))
+            scores.append(np.dot(input_array, record_array) / (np.linalg.norm(input_array) * np.linalg.norm(record_array)))
+            #  scores.append(-np.linalg.norm(input_array - record_array))
+            print(scores[i])
+
         indexed_scores = list(enumerate(scores))
         sorted_scores = sorted(indexed_scores, key=lambda x: x[1], reverse=True)
         top_n_neighbours = [index for index, _ in sorted_scores[:n]]
@@ -82,14 +88,15 @@ if __name__ == "__main__":
     for i in range(len(vector_json_list)):
         vector_json, = vector_json_list[i]
         vector_list.append(json.loads(vector_json))
+
     
 
 
     '''
     extract
     '''
-    while True:
-        query = input("enter the query:\n")
+    query = input("enter the query:\n")
+    while query is not None:
         neighbours_extractor = neighbourExtractor(model_path_src, vector_list)
         result = neighbours_extractor(query, n)
         print(result)
@@ -97,3 +104,4 @@ if __name__ == "__main__":
             cursor.execute(f"SELECT target FROM vecTable LIMIT 1 OFFSET {i}")
             text = cursor.fetchone()
             print(text)
+        query = input("enter the query:\n")
