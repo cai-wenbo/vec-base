@@ -85,7 +85,7 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
 
             b_neg_lex_vector = torch.reshape(b_negative_lex_mask_reshaped, shape = (b_negative_lex.shape[0], -1, b_neg_lex_vector_reshaped[-1]))
 
-            loss = creterian(b_triple_vector, b_lex_vector, b)
+            loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vectorr)
 
             loss.backward()
             optimizer.step()
@@ -127,7 +127,7 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
 
                 b_neg_lex_vector = torch.reshape(b_negative_lex_mask_reshaped, shape = (b_negative_lex.shape[0], -1, b_neg_lex_vector_reshaped[-1]))
 
-                loss = creterian(b_triple_vector, b_lex_vector, b)
+                loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector)
 
                 loss_scalar = loss.item()
                 loss_sum_test += loss_scalar
