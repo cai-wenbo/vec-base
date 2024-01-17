@@ -83,9 +83,10 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
             #  shape = (B * N, H)
             b_neg_lex_vector_reshaped = model(b_negative_lex_reshaped, attention_mask = b_negative_lex_mask_reshaped)[1]
 
-            b_neg_lex_vector = torch.reshape(b_negative_lex_mask_reshaped, shape = (b_negative_lex.shape[0], -1, b_neg_lex_vector_reshaped[-1]))
+            #  b_neg_lex_vector = torch.reshape(b_negative_lex_mask_reshaped, shape = (b_negative_lex.shape[0], b_negative_lex.shape[1], b_neg_lex_vector_reshaped.shape[-1]))
+            b_neg_lex_vector = b_neg_lex_vector_reshaped.view(-1, b_negative_lex.shape[1], b_neg_lex_vector_reshaped.shape[-1])
 
-            loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vectorr)
+            loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector)
 
             loss.backward()
             optimizer.step()
@@ -125,7 +126,10 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
                 #  shape = (B * N, H)
                 b_neg_lex_vector_reshaped = model(b_negative_lex_reshaped, attention_mask = b_negative_lex_mask_reshaped)[1]
 
-                b_neg_lex_vector = torch.reshape(b_negative_lex_mask_reshaped, shape = (b_negative_lex.shape[0], -1, b_neg_lex_vector_reshaped[-1]))
+                #  b_neg_lex_vector = torch.reshape(b_negative_lex_mask_reshaped, shape = (b_negative_lex.shape[0], b_negative_lex.shape[1], b_neg_lex_vector_reshaped.shape[-1]))
+                b_neg_lex_vector = b_neg_lex_vector_reshaped.view(-1, b_negative_lex.shape[1], b_neg_lex_vector_reshaped.shape[-1])
+
+                loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector)
 
                 loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector)
 
@@ -182,8 +186,8 @@ def train(training_config):
     '''
     dataloader
     '''
-    train_dataset = WebNLGDataset(data_path = './data/en/train', max_length = 32, selected_field = [0, 16])
-    test_dataset = WebNLGDataset(data_path = './data/en/dev', max_length = 32, selected_field = [0, 16])
+    train_dataset = WebNLGDataset(data_path = './data/en/train', max_length = 32, num_of_negative = training_config['num_neg'], selected_field = [0, 16])
+    test_dataset = WebNLGDataset(data_path = './data/en/dev', max_length = 32, num_of_negative = training_config['num_neg'], selected_field = [0, 16])
 
     dataloader_train = DataLoader(train_dataset, batch_size = training_config['batch_size'], shuffle = True)
     dataloader_test  = DataLoader(test_dataset, batch_size  = training_config['batch_size'], shuffle = False)
@@ -257,12 +261,13 @@ def train(training_config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_of_epochs"    , type=int   , help="number of epochs"                                  , default=20)
-    parser.add_argument("--batch_size"       , type=int   , help="batch size"                                        , default=256)
+    parser.add_argument("--batch_size"       , type=int   , help="batch size"                                        , default=128)
     parser.add_argument("--learning_rate"    , type=float , help="learning rate"                                     , default=1e-4)
     parser.add_argument("--weight_decay"     , type=float , help="weight_decay"                                      , default=1e-4)
     parser.add_argument("--vocab_size"       , type=int   , help="vocab size"                                        , default=21128)
     parser.add_argument("--embedding_dim"    , type=int   , help="embedding dimmention"                              , default=512)
     parser.add_argument("--num_labels"       , type=int   , help="types of labels"                                   , default=6)
+    parser.add_argument("--num_neg"       , type=int   , help="num of neg"                                   , default=2)
     parser.add_argument("--sequence_length"  , type=int   , help="sequence_length"                                   , default=128)
     parser.add_argument("--model_path_dst"   , type=str   , help="the directory to save model"                       , default='./saved_models/')
     parser.add_argument("--model_path_src"   , type=str   , help="the directory to load model"                       , default='./saved_models/')

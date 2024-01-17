@@ -22,7 +22,7 @@ class WebNLGDataset(Dataset):
     read the WebNLG dataset
     and return the (triple, text) data for training
     '''
-    def __init__(self, data_path, max_length, num_of_negative = 4, selected_field = None):
+    def __init__(self, data_path, max_length, num_of_negative = 5, selected_field = None):
         '''
         '''
         b = Benchmark()
@@ -71,7 +71,7 @@ class WebNLGDataset(Dataset):
 
 
     def __getitem__(self, idx):
-        random_list = [random.randint(0, len(self.tripleLexPair_list) -1) for _ in range(list_length)]
+        random_list = [random.randint(0, len(self.tripleLexPair_list) -1) for _ in range(self.num_of_negative)]
 
         negative_lex = list()
         negative_lex_mask = list()
