@@ -1,3 +1,4 @@
+from numpy import shape
 import torch
 import torch.nn as nn
 from torch.optim import AdamW
@@ -67,7 +68,7 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
         #  train loop
         for i, batch in enumerate(dataloader_train):
             batch = tuple(t.to(device) for t in batch)
-            b_triple_tensor, b_triple_mask_tensor, b_lex_tensor, b_lex_mask_tensor, b_negative_lex_1, b_negative_lex_mask_1, b_negative_lex_2, b_negative_lex_mask_2 = batch
+            b_triple_tensor, b_triple_mask_tensor, b_lex_tensor, b_lex_mask_tensor, b_negative_lex, b_negative_lex_mask = batch
 
             optimizer.zero_grad()
 
@@ -75,11 +76,16 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
             
             b_triple_vector = model(b_triple_tensor, attention_mask = b_triple_mask_tensor)[1]
             b_lex_vector = model(b_lex_tensor, attention_mask = b_lex_mask_tensor)[1]
-            b_neg_lex_vector_1 = model(b_negative_lex_1, attention_mask = b_negative_lex_mask_1)[1]
-            b_neg_lex_vector_2 = model(b_negative_lex_2, attention_mask = b_negative_lex_mask_2)[1]
 
+            b_negative_lex_reshaped = torch.reshape(b_negative_lex, shape = (-1, b_negative_lex.shape[-1]))
+            b_negative_lex_mask_reshaped = torch.reshape(b_negative_lex_mask, shape = (-1, b_negative_lex_mask.shape[-1]))
 
-            loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector_1, b_neg_lex_vector_2)
+            #  shape = (B * N, H)
+            b_neg_lex_vector_reshaped = model(b_negative_lex_reshaped, attention_mask = b_negative_lex_mask_reshaped)[1]
+
+            b_neg_lex_vector = torch.reshape(b_negative_lex_mask_reshaped, shape = (b_negative_lex.shape[0], -1, b_neg_lex_vector_reshaped[-1]))
+
+            loss = creterian(b_triple_vector, b_lex_vector, b)
 
             loss.backward()
             optimizer.step()
@@ -107,16 +113,21 @@ def train_test_loop(training_config, model, dataloader_train, dataloader_test, o
         #  test_loop
         for i, batch in enumerate(dataloader_test):
             batch = tuple(t.to(device) for t in batch)
-            b_triple_tensor, b_triple_mask_tensor, b_lex_tensor, b_lex_mask_tensor, b_negative_lex_1, b_negative_lex_mask_1, b_negative_lex_2, b_negative_lex_mask_2 = batch
+            b_triple_tensor, b_triple_mask_tensor, b_lex_tensor, b_lex_mask_tensor, b_negative_lex, b_negative_lex_mask = batch
 
             with torch.no_grad():
                 b_triple_vector = model(b_triple_tensor, attention_mask = b_triple_mask_tensor)[1]
                 b_lex_vector = model(b_lex_tensor, attention_mask = b_lex_mask_tensor)[1]
-                b_neg_lex_vector_1 = model(b_negative_lex_1, attention_mask = b_negative_lex_mask_1)[1]
-                b_neg_lex_vector_2 = model(b_negative_lex_2, attention_mask = b_negative_lex_mask_2)[1]
 
+                b_negative_lex_reshaped = torch.reshape(b_negative_lex, shape = (-1, b_negative_lex.shape[-1]))
+                b_negative_lex_mask_reshaped = torch.reshape(b_negative_lex_mask, shape = (-1, b_negative_lex_mask.shape[-1]))
 
-                loss = creterian(b_triple_vector, b_lex_vector, b_neg_lex_vector_1, b_neg_lex_vector_2)
+                #  shape = (B * N, H)
+                b_neg_lex_vector_reshaped = model(b_negative_lex_reshaped, attention_mask = b_negative_lex_mask_reshaped)[1]
+
+                b_neg_lex_vector = torch.reshape(b_negative_lex_mask_reshaped, shape = (b_negative_lex.shape[0], -1, b_neg_lex_vector_reshaped[-1]))
+
+                loss = creterian(b_triple_vector, b_lex_vector, b)
 
                 loss_scalar = loss.item()
                 loss_sum_test += loss_scalar

@@ -8,7 +8,7 @@ class EuciLoss(nn.Module):
         super(EuciLoss, self).__init__()
         self.reduction = reduction
     
-    def forward(self, target_vec, pos_vec, neg_vec_1, neg_vec_2):
+    def forward(self, target_vec, pos_vec, neg_vec):
         '''
         target_vec shape = (batch_size, inner_dim)
         pos_vec shape = (batch_size, inner_dim)
@@ -28,15 +28,16 @@ class EuciLoss(nn.Module):
 
 
         pos_score = F.cosine_similarity(target_vec, pos_vec)
-        neg_score_1 = F.cosine_similarity(target_vec, neg_vec_1)
-        neg_score_2 = F.cosine_similarity(target_vec, neg_vec_2)
+        print(pos_score.shape)
+        neg_score = F.cosine_similarity(target_vec.unsqueeze(1).expand(-1, neg_vec.shape[1], -1), neg_vec)
+        print(neg_score.shape)
 
         #  shape = batch_size, num_of_negative
         #  neg_score = F.cosine_similarity(target_vec, neg_vec)
 
         #  print(weights)
-        loss =  -(F.logsigmoid(pos_score) + F.logsigmoid(-neg_score_1) + F.logsigmoid(-neg_score_2))
-        #  loss  = pos_score - neg_score
+        #  loss =  -(F.logsigmoid(pos_score) + F.logsigmoid(-neg_score_1) + F.logsigmoid(-neg_score))
+        loss  = pos_score - neg_score
         #  loss = pos_distance - neg_distance
         #  loss =  pos_score - 1 / 2  * (neg_score_1 + neg_score_2)
 

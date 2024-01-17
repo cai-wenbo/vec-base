@@ -1,4 +1,4 @@
-from numpy import tri
+from numpy import dtype, tri
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
@@ -71,15 +71,15 @@ class WebNLGDataset(Dataset):
 
 
     def __getitem__(self, idx):
-        
-        random_idx = random.randint(0, len(self.tripleLexPair_list) -1)
+        random_list = [random.randint(0, len(self.tripleLexPair_list) -1) for _ in range(list_length)]
 
-        negative_lex_1 = self.tripleLexPair_list[random_idx].encoded_lex
-        negative_lex_mask_1 = self.tripleLexPair_list[random_idx].lex_mask
-        random_idx = random.randint(0, len(self.tripleLexPair_list) -1)
+        negative_lex = list()
+        negative_lex_mask = list()
 
-        negative_lex_2 = self.tripleLexPair_list[random_idx].encoded_lex
-        negative_lex_mask_2 = self.tripleLexPair_list[random_idx].lex_mask
+        for i in random_list:
+            negative_lex.append(self.tripleLexPair_list[i].encoded_lex)
+            negative_lex_mask.append(self.tripleLexPair_list[i].lex_mask)
+
 
 
         #  tensorlize
@@ -87,12 +87,9 @@ class WebNLGDataset(Dataset):
         triple_mask_tensor = torch.tensor(self.tripleLexPair_list[idx].triple_mask    , dtype = torch.int32)
         lex_tensor         = torch.tensor(self.tripleLexPair_list[idx].encoded_lex    , dtype = torch.int32)
         lex_mask_tensor    = torch.tensor(self.tripleLexPair_list[idx].lex_mask       , dtype = torch.int32)
-
-        negative_lex_tensor_1 = torch.tensor(negative_lex_1, dtype = torch.int32)
-        negative_lex_mask_tensor_1 = torch.tensor(negative_lex_mask_1, dtype = torch.int32)
-        negative_lex_tensor_2 = torch.tensor(negative_lex_2, dtype = torch.int32)
-        negative_lex_mask_tensor_2 = torch.tensor(negative_lex_mask_2, dtype = torch.int32)
+        negative_lex_tensor = torch.tensor(negative_lex, dtype = torch.int32)
+        negative_lex_mask_tensor = torch.tensor(negative_lex_mask, dtype = torch.int32)
 
         
 
-        return triple_tensor, triple_mask_tensor, lex_tensor, lex_mask_tensor, negative_lex_tensor_1, negative_lex_mask_tensor_1, negative_lex_tensor_2, negative_lex_mask_tensor_2
+        return triple_tensor, triple_mask_tensor, lex_tensor, lex_mask_tensor, negative_lex_tensor, negative_lex_mask_tensor
