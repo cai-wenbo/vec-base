@@ -51,7 +51,7 @@ class neighbourExtractor():
             #  scores.append(np.sum(np.multiply(input_array,record_array)))
             scores.append(np.dot(input_array, record_array) / (np.linalg.norm(input_array) * np.linalg.norm(record_array)))
             #  scores.append(-np.linalg.norm(input_array - record_array))
-            print(scores[i])
+            #  print(scores[i])
 
         indexed_scores = list(enumerate(scores))
         sorted_scores = sorted(indexed_scores, key=lambda x: x[1], reverse=True)

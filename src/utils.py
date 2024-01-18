@@ -34,7 +34,7 @@ class EuciLoss(nn.Module):
         #  neg_score = F.cosine_similarity(target_vec, neg_vec)
 
         #  print(weights)
-        loss =  -(F.logsigmoid(pos_score) + torch.sum(F.logsigmoid(-neg_score), dim = -1))
+        loss =  -(F.logsigmoid(pos_score) + torch.sum(F.logsigmoid(-neg_score), dim = -1)/ neg_score.shape[1])
         #  loss  = pos_score - neg_score
         #  loss = pos_distance - neg_distance
         #  loss =  pos_score - 1 / 2  * (neg_score_1 + neg_score_2)
